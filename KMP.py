@@ -3,7 +3,9 @@
 # KMP algorithm for efficient string-matching
 class KMP:
     def partial(self, pattern):
-        """ Calculate partial match table: String -> [Int]"""
+        """
+        Calculate partial match table: String to [Int]
+        """
         ret = [0]
 
         for i in range(1, len(pattern)):
@@ -15,7 +17,7 @@ class KMP:
 
     def search(self, T, P):
         """
-        KMP search main algorithm: String -> String -> [Int]
+        KMP search main algorithm: String vs String to [Int]
         Return all the matching position of pattern string P in S
         """
         partial, ret, j = self.partial(P), [], 0
