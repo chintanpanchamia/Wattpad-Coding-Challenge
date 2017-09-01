@@ -35,6 +35,8 @@ def get_pattern(phrase_list):
 
 def get_score(filename, low_risk_pattern, high_risk_pattern):
     """
+    Version 1, O(n x m x l) n - size of input, m - number of phrases, l - average length of a phrase;
+    Time complexity, horribly inefficient
     :param filename:
     :param low_risk_pattern:
     :param high_risk_pattern:
@@ -51,25 +53,24 @@ def get_score(filename, low_risk_pattern, high_risk_pattern):
 
 
 def get_proper_score(filename, trie):
+    """
+    Version 2, O(n + lm) n - number of words in input, m - number of phrases, l - number of words in phrase;
+    Time complexity
+    :param filename:
+    :param trie:
+    :return: Calculate score of input sentence against generated Trie
+    """
     content = list()
     regex = re.compile('[%s]' % re.escape(string.punctuation))
     with open(filename, 'r') as f:
         for line in f:
             line = line.lower()
-            line = regex.sub('', line)
+            line = regex.sub('', line)  # removes all punctuation
             content.extend(line.strip().split(' '))
 
     pointers = list()
 
-    # pointers.append(trie[content[index]])
-
     score = 0
-
-    # while len(pointers) > 0 and index < len(content):
-    #     i = pointers.pop(0)
-    #     if not trie.has_start(content[i]):
-    #         index += 1
-    #         pointers.append(index)
 
     for i in range(len(content)):
         if trie.has_start(content[i]):
@@ -77,14 +78,11 @@ def get_proper_score(filename, trie):
 
         if len(pointers) > 0:
             for j in range(len(pointers)):
-                # print pointers[j].label, pointers[j].score
                 if pointers[j] is None:
                     continue
-                # print content[i], pointers[j].children.keys()
+
                 if content[i] in pointers[j].children:
-
                     pointers[j] = pointers[j][content[i]]
-
                     score += pointers[j].score
                 else:
                     pointers[j] = None
@@ -93,6 +91,12 @@ def get_proper_score(filename, trie):
 
 
 def add_phrases_to_trie(trie, phrase_list, score):
+    """
+    :param trie:
+    :param phrase_list:
+    :param score:
+    :return: Add phrases to generate Trie, along with score used for indicating risk level: i.e. Low/High
+    """
     if phrase_list is None or len(phrase_list) is 0:
         raise ValueError('Phrase list cannot be empty')
 
