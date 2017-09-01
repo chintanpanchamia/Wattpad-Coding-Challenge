@@ -5,6 +5,7 @@ import os
 from Trie import Trie
 import pickle
 
+
 def get_phrases(file_name):
     """
     :param file_name:
