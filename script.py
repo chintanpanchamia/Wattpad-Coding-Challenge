@@ -1,6 +1,8 @@
 # __author__ = 'chintanpanchamia'
 import re
+import string
 import os
+from Trie import Trie
 
 
 def get_phrases(file_name):
@@ -8,7 +10,7 @@ def get_phrases(file_name):
     :param file_name:
     :return: phrase list for appropriate corpus
     """
-    phrases = []
+    phrases = list()
     with open(file_name, 'r') as f:
         for line in f:
             phrases.append(line.strip().lower())
@@ -16,7 +18,6 @@ def get_phrases(file_name):
     return phrases
 
 
-# compile pattern for regex generated from all phrases in the list
 def get_pattern(phrase_list):
     """
     :param phrase_list:
@@ -32,8 +33,13 @@ def get_pattern(phrase_list):
     return re.compile(regex)
 
 
-# generate score for input taken from passed file and against compiled patterns for high and low risk words
 def get_score(filename, low_risk_pattern, high_risk_pattern):
+    """
+    :param filename:
+    :param low_risk_pattern:
+    :param high_risk_pattern:
+    :return: generate score for input taken from passed file and against compiled patterns for high and low risk words
+    """
     content = ''
     with open(filename, 'r') as f:
         for line in f:
@@ -44,13 +50,63 @@ def get_score(filename, low_risk_pattern, high_risk_pattern):
     return 2 * high_risk_frequency + low_risk_frequency
 
 
-# main function
+def get_proper_score(filename, trie):
+    content = list()
+    regex = re.compile('[%s]' % re.escape(string.punctuation))
+    with open(filename, 'r') as f:
+        for line in f:
+            line = line.lower()
+            line = regex.sub('', line)
+            content.extend(line.strip().split(' '))
+
+    pointers = list()
+
+    # pointers.append(trie[content[index]])
+
+    score = 0
+
+    # while len(pointers) > 0 and index < len(content):
+    #     i = pointers.pop(0)
+    #     if not trie.has_start(content[i]):
+    #         index += 1
+    #         pointers.append(index)
+
+    for i in range(len(content)):
+        if trie.has_start(content[i]):
+            pointers.append(trie.head)
+
+        if len(pointers) > 0:
+            for j in range(len(pointers)):
+                # print pointers[j].label, pointers[j].score
+                if pointers[j] is None:
+                    continue
+                # print content[i], pointers[j].children.keys()
+                if content[i] in pointers[j].children:
+
+                    pointers[j] = pointers[j][content[i]]
+
+                    score += pointers[j].score
+                else:
+                    pointers[j] = None
+
+    return score
+
+
+def add_phrases_to_trie(trie, phrase_list, score):
+    if phrase_list is None or len(phrase_list) is 0:
+        raise ValueError('Phrase list cannot be empty')
+
+    for phrase in phrase_list:
+        trie.add(phrase, score)
+
+
 def main():
     low_risk_phrases = get_phrases('low_risk_phrases.txt')
     high_risk_phrases = get_phrases('high_risk_phrases.txt')
 
-    low_risk_phrases_pattern = get_pattern(low_risk_phrases)
-    high_risk_phrases_pattern = get_pattern(high_risk_phrases)
+    trie = Trie()
+    add_phrases_to_trie(trie, low_risk_phrases, 1)
+    add_phrases_to_trie(trie, high_risk_phrases, 2)
 
     filename_regex = r'\b(input(\d+).txt)\b'
     filename_pattern = re.compile(filename_regex)
@@ -60,9 +116,9 @@ def main():
         for filename in filenames:
             match = filename_pattern.match(filename)
             if match is not None:
-                print '{0}:{1}'.format(filename.split('.')[0], get_score(filename, low_risk_phrases_pattern,
-                                                                         high_risk_phrases_pattern))
+                print '{0}:{1}'.format(filename.split('.')[0], get_proper_score(filename, trie))
 
 
 if __name__ == '__main__':
     main()
+
