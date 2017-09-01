@@ -63,6 +63,8 @@ def get_proper_score(filename, trie):
     """
     content = list()
     regex = re.compile('[%s]' % re.escape(string.punctuation))
+    # dir = os.path.dirname(os.path.abspath(__file__))
+    # filename = os.path.join(dir, filename)
     with open(filename, 'r') as f:
         for line in f:
             line = line.lower()
@@ -116,24 +118,23 @@ def save_trie_structure(trie_object, filename):
 
 
 def main():
-    low_risk_phrases = get_phrases('low_risk_phrases.txt')
-    high_risk_phrases = get_phrases('high_risk_phrases.txt')
-
+    low_risk_phrases = get_phrases('Data/low_risk_phrases.txt')
+    high_risk_phrases = get_phrases('Data/high_risk_phrases.txt')
     trie = Trie()
     add_phrases_to_trie(trie, low_risk_phrases, 1)
     add_phrases_to_trie(trie, high_risk_phrases, 2)
 
     save_trie_structure(trie, 'trie.pkl')
-
     filename_regex = r'\b(input(\d+).txt)\b'
     filename_pattern = re.compile(filename_regex)
 
     with open('output.txt', 'w') as output:
-        path = '.'  # look in present working directory for input files
-        for root, directory, filenames in os.walk(path):
+        path = './Data/'  # look in present working directory for input files
+        for root, dirs, filenames in os.walk(path):
             for filename in filenames:
                 match = filename_pattern.match(filename)
                 if match is not None:
+                    filename = os.path.join(root, filename)
                     output.writelines('{0}:{1}\n'.format(filename, get_proper_score(filename, trie)))
 
 
