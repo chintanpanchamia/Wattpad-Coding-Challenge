@@ -1,0 +1,15 @@
+input01.txt:3
+input02.txt:0
+input03.txt:2
+input04.txt:5
+input05.txt:3
+input06.txt:1
+input07.txt:2
+input08.txt:2
+input09.txt:1
+input10.txt:1
+input11.txt:3
+input12.txt:4
+input13.txt:0
+input14.txt:3
+input15.txt:1
